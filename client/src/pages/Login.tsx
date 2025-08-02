@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { MnemonicInput } from '@/components/display'
 import { useAuth } from '@/context/auth'
-import { contractMgr } from '@/game/data_mgr/contract_mgr'
+import { contractMgr, TestPrivateKey } from '@/game/data_mgr/contract_mgr'
 import { ethers } from 'ethers'
 
 export default function Login() {
@@ -31,6 +31,7 @@ export default function Login() {
       const wallet = ethers.Wallet.fromPhrase(realMnemonic)
       const user = login(undefined, realMnemonic, wallet, nickName)
       localStorage.setItem('account', user.account)
+
       contractMgr.reload(wallet.privateKey)
       navigate('/room_list')
     } catch (error) {

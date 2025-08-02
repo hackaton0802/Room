@@ -20,6 +20,7 @@ export default function Header() {
     if (user) {
       const wallet = ethers.Wallet.fromPhrase(user.mnemonic)
       login(user, user.mnemonic, wallet)
+      
       contractMgr.reload(wallet.privateKey)
       navigate('/room_list');
       return

@@ -43,9 +43,8 @@ export function PlayerView(props: PlayerProps) {
 
     const hanldeEnter = (address:any, roomId:any, name:any): void => {
         console.log(`🚪 玩家进入房间：${name} (${address}) -> 房间 ${roomId.toString()}`);
-
-        console.log('wallet:', wallet);
-        const player = new Player(true)
+        
+        const player = new Player(wallet?.address == address)
         player.setPosition(0, 0)
         playerMager.addPlayer(address, player)
         container.addChild(player)

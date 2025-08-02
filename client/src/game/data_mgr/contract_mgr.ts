@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { playerMager } from "./player_mgr";
 
 const roomAbi = [
     'function getAllRooms() external view returns (uint256[] memory ids_, string[] memory names_)',
@@ -14,7 +13,7 @@ const roomAbi = [
 const roomContractAddress = import.meta.env.VITE_ROOMS_ADDRESS || '';
 
 const rpcUrl = import.meta.env.VITE_ETH_URL;
-const testPrivateKey = import.meta.env.VITE_PRIVATE_KEY;
+export const TestPrivateKey = import.meta.env.VITE_PRIVATE_KEY;
 
 export class ContractManager {
     private roomContract: ethers.Contract;
@@ -25,9 +24,6 @@ export class ContractManager {
     }
 
     reload(privateKey: string) {
-        if (testPrivateKey) {
-            privateKey = testPrivateKey;
-        }
         const provider = new ethers.JsonRpcProvider(rpcUrl);
         const wallet = new ethers.Wallet(privateKey, provider);
         this.roomContract = new ethers.Contract(roomContractAddress, roomAbi, wallet);
@@ -39,13 +35,7 @@ export class ContractManager {
 
     async createRoom(name: string) {
         try {
-            const tx = await this.roomContract.createRoom(name);
-            console.log("Transaction sent:", tx.hash);
-
-            const receipt = await tx.wait();
-            console.log("Transaction mined:", receipt.transactionHash);
-
-            return null;
+            await this.roomContract.createRoom(name);
         } catch (error) {
             console.error("Failed to create room:", error);
             return null;
