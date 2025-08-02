@@ -20,8 +20,6 @@ export class Player extends Container {
     private isLocal: boolean
     private character: Character = Character.HUMAN1
     public sprite: AnimatedSprite | undefined
-    private carriedItem: Sprite | null = null;
-    private carriedItemId: SPRITE_ID | null = null;
 
     public moveStatus: MoveType = MoveType.IDLE;
     public currentFacing: Direction = Direction.DOWN
@@ -30,6 +28,9 @@ export class Player extends Container {
     private keysPressed = new Set<string>()
     private keyPressed: string = ''
 
+    private targetX: number | null = null;
+    private targetY: number | null = null;
+    private speed: number = 100; // 每秒移动100像素（可调整）
     constructor(isLocal = false) {
         super()
         this.isLocal = isLocal
@@ -60,52 +61,51 @@ export class Player extends Container {
             this.keyPressed = ''
         }
     }
-
-    updateMe(): boolean {
-        if (!this.isLocal) return false
-        const lastStatus = this.moveStatus
-        const lastDir = this.currentFacing
-
-        this.moveStatus = MoveType.WALK
-        if (this.keyPressed === 'ArrowLeft' ||
-            this.keyPressed === 'a' ||
-            this.keyPressed === 'A') {
-            this.currentFacing = Direction.LEFT
-        } else if (this.keyPressed === 'ArrowRight' ||
-            this.keyPressed === 'd' ||
-            this.keyPressed === 'D') {
-            this.currentFacing = Direction.RIGHT
-        } else if (this.keyPressed === 'ArrowUp' ||
-            this.keyPressed === 'w' ||
-            this.keyPressed === 'W') {
-            this.currentFacing = Direction.UP
-        } else if (this.keyPressed === 'ArrowDown' ||
-            this.keyPressed === 's' ||
-            this.keyPressed === 'S') {
-            this.currentFacing = Direction.DOWN
-        } else {
-            this.moveStatus = MoveType.IDLE
-        }
-        if (lastStatus === this.moveStatus &&
-            lastDir === this.currentFacing) {
-            return false
-        }
-        return true
+    setTarget(x: number, y: number) {
+        this.targetX = x;
+        this.targetY = y;
     }
-    update(x: number, y: number, dir: number, move: number) {
-        this.moveStatus = move
-        this.currentFacing = dir
-
-        if (this.currentFacing == Direction.LEFT) {
-            this.setDirection(-1)
-        }
-        if (this.currentFacing == Direction.RIGHT) {
-            this.setDirection(1)
+    update(dt: number) {
+        if (this.targetX === null || this.targetY === null) {
+            this.moveStatus = MoveType.IDLE;
+            this.updateAnimation();
+            return;
         }
 
-        this.x = x
-        this.y = y
-        this.updateAnimation()
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const step = this.speed * dt;
+
+        if (dist <= step) {
+            // 到达目标点
+            this.x = this.targetX;
+            this.y = this.targetY;
+            this.targetX = null;
+            this.targetY = null;
+            this.moveStatus = MoveType.IDLE;
+        } else {
+            // 沿方向移动
+            const angle = Math.atan2(dy, dx);
+            this.x += Math.cos(angle) * step;
+            this.y += Math.sin(angle) * step;
+            this.moveStatus = MoveType.WALK;
+
+            // 设置朝向
+            if (Math.abs(dy) > Math.abs(dx)) {
+                this.currentFacing = dy > 0 ? Direction.DOWN : Direction.UP;
+            } else {
+                this.currentFacing = dx > 0 ? Direction.RIGHT : Direction.LEFT;
+            }
+
+            if (this.currentFacing === Direction.LEFT) {
+                this.setDirection(-1);
+            } else if (this.currentFacing === Direction.RIGHT) {
+                this.setDirection(1);
+            }
+        }
+
+        this.updateAnimation();
     }
 
     private setAnim(animKey: AnimShowType) {
@@ -132,7 +132,7 @@ export class Player extends Container {
         this.sprite.play()
     }
 
-    private updateAnimation() {
+    public updateAnimation() {
         let anim: AnimShowType = AnimShowType.IDLE_FRONT
 
         if (this.moveStatus != MoveType.IDLE) {
@@ -164,40 +164,5 @@ export class Player extends Container {
 
     isLocalPlayer() {
         return this.isLocal
-    }
-
-    public setCarriedItem(itemType: SPRITE_ID, texture: Texture) {
-        // 移除旧物品
-        if (this.carriedItem) {
-            this.removeChild(this.carriedItem);
-            this.carriedItem.destroy();
-            this.carriedItem = null;
-        }
-
-        // 添加新物品
-        if (texture && this.sprite) {
-            const itemSprite = new Sprite(texture);
-            itemSprite.anchor.set(0.5, 1); // 底部中心对齐
-            itemSprite.width = View.PLAYER_SIZE / 3;
-            itemSprite.height = View.PLAYER_SIZE / 3;
-
-            itemSprite.position.set(this.sprite.x, this.sprite.y - View.PLAYER_SIZE / 3);
-            this.addChild(itemSprite);
-            this.carriedItem = itemSprite;
-            this.carriedItemId = itemType;
-        }
-    }
-
-    public removeCarriedItem() {
-        if (this.carriedItem) {
-            this.removeChild(this.carriedItem);
-            this.carriedItem.destroy();
-            this.carriedItem = null;
-            this.carriedItemId = null;
-        }
-    }
-
-    public getCarriedItem(): [SPRITE_ID | null, Sprite | null] {
-        return [this.carriedItemId, this.carriedItem];
     }
 }

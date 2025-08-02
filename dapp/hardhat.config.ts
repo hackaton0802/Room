@@ -11,6 +11,10 @@ const config: HardhatUserConfig = {
         {
           privateKey: '0xc638cebdc25ced92f0911b466904ac1277ce66a04b0f0554a29980b28e4411d5',  // 你的私钥
           balance: '1000000000000000000000' // 1000 ETH
+        },
+        {
+          privateKey: '0x980b74b71dd0f71c1702092d94ee10599ab272c2f88e0b7a3cc16b1cdf4137ab',  // 你的私钥
+          balance: '1000000000000000000000' // 1000 ETH
         }
       ]
     },

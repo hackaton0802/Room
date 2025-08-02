@@ -26,34 +26,59 @@ export function PlayerView(props: PlayerProps) {
     const { wallet } = useAuth();
     useEffect(() => {
         contractMgr.addEvent("PlayerEntered", hanldeEnter);
+        contractMgr.addEvent("PlayerMoved", hanldeMove);
     }, [])
 
-    let syncAccumulator = 0;
+
     useTick((delta) => {
-        syncAccumulator += delta.deltaMS;
-        if (syncAccumulator >= 100) {
-            syncAccumulator = 0;
-
-            const self = playerMager.getSelf()
-            if (self && self.updateMe()) {
-
-            }
+        const dt = delta.deltaMS / 1000; // delta 是以帧数为单位的（默认60fps为基准）
+        const players = playerMager.getPlayers();
+        for (const player of players) {
+            player.update(dt);
         }
     })
 
-    const hanldeEnter = (address:any, roomId:any, name:any): void => {
-        console.log(`🚪 玩家进入房间：${name} (${address}) -> 房间 ${roomId.toString()}`);
-        
-        const player = new Player(wallet?.address == address)
+    let myRoom: number = 0
+    const hanldeEnter = (address: any, roomId: any, name: any): void => {
+        if (wallet?.address !== address) {
+            if (myRoom == 0 || myRoom !== roomId) return
+        }
+        const player = new Player(wallet?.address === address)
         player.setPosition(0, 0)
         playerMager.addPlayer(address, player)
         container.addChild(player)
         if (player.isLocalPlayer()) {
+            myRoom = roomId
             playerMager.setSelf(player)
             if (player.sprite) {
                 camera.setFollowTarget(player)
             }
+
+            (async () => {
+                const players = await contractMgr.getRoomPlayers(roomId);
+                console.log("players:", players);
+                for (const p of players) {
+                    const isSelf = p.address.toLowerCase() === wallet?.address;
+                    if (isSelf) continue;
+
+                    const player = new Player(false);
+                    player.setPosition(p.x, p.y);
+                    playerMager.addPlayer(p.address, player);
+                    container.addChild(player);
+                }
+            })();
         }
+        console.log(`🚪 玩家进入房间：${name} (${address}) -> 房间 ${roomId.toString()}`);
+    }
+
+    const hanldeMove = (address: any, roomId: any, posX: any, poxY: any): void => {
+        if (wallet?.address !== address) {
+            if (myRoom == 0 || myRoom !== roomId) return
+        } else {
+            return
+        }
+        console.log(`🚪 玩家移动：(${address}) -> 房间 ${roomId.toString()}`);
+        playerMager.findPlayer(address)?.setTarget(posX - contractMgr.offset, poxY - contractMgr.offset)
     }
 
     return null

@@ -18,6 +18,7 @@ export const TestPrivateKey = import.meta.env.VITE_PRIVATE_KEY;
 export class ContractManager {
     private roomContract: ethers.Contract;
     private roomId: number = 0;
+    public offset: number = 10000;
     constructor() {
         const provider = new ethers.JsonRpcProvider(rpcUrl);
         this.roomContract = new ethers.Contract(roomContractAddress, roomAbi, provider);
@@ -29,7 +30,7 @@ export class ContractManager {
         this.roomContract = new ethers.Contract(roomContractAddress, roomAbi, wallet);
     }
 
-    addEvent(eventName: string, callback: (...args: any[]) => void){
+    addEvent(eventName: string, callback: (...args: any[]) => void) {
         this.roomContract.on(eventName, callback);
     }
 
@@ -82,8 +83,45 @@ export class ContractManager {
         }
     }
 
+    async getRoomPlayers(roomId: number): Promise<{
+        address: string;
+        name: string;
+        x: number;
+        y: number;
+    }[]> {
+        try {
+            const [addrs, names, xs, ys] = await this.roomContract.getRoomPlayers(roomId);
+
+            const players = addrs.map((addr: string, index: number) => ({
+                address: addr,
+                name: names[index],
+                x: Number(xs[index]) - this.offset,  // 去掉偏移，方便地图显示
+                y: Number(ys[index]) - this.offset,
+            }));
+
+            return players;
+        } catch (error) {
+            console.error("Failed to get room players:", error);
+            return [];
+        }
+    }
+
+
     async getAllRooms() {
         return await this.roomContract.getAllRooms();
+    }
+
+    async move(posX: number, posY: number) {
+        try {
+            // 先取整，再加偏移
+            const finalX = Math.floor(posX) + this.offset;
+            const finalY = Math.floor(posY) + this.offset;
+
+            await this.roomContract.move(finalX, finalY);
+        } catch (error) {
+            console.error("Failed to move:", error);
+            return null;
+        }
     }
 }
 
