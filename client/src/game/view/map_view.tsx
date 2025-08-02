@@ -38,7 +38,8 @@ export function MapView(props: MapProps) {
         if (!self) return;
 
         const local = event.getLocalPosition(container);
-        self.setTarget(local.x, local.y);
+        playerMager.findPlayer(self.address)?.setTarget(local.x, local.y);
+        // self.setTarget(local.x, local.y);
         contractMgr.move(local.x, local.y);
     }
 

@@ -19,19 +19,20 @@ export class PlayerManager {
     }
 
     hasPlayer(address: string): boolean {
-        return this.players.has(address.toLowerCase());  // 确保地址统一格式
+        return this.players.has(address);  // 确保地址统一格式
     }
 
     findPlayer(address: string): Player | null {
-        return this.players.get(address.toLowerCase()) || null;
+        console.log('findPlayer', this.players.get(address));
+        return this.players.get(address) || null;
     }
 
     addPlayer(address: string, player: Player) {
-        this.players.set(address.toLowerCase(), player);
+        this.players.set(address, player);
     }
 
     removePlayer(address: string) {
-        this.players.delete(address.toLowerCase());
+        this.players.delete(address);
     }
 
 }

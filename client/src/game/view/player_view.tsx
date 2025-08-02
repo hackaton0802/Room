@@ -43,7 +43,7 @@ export function PlayerView(props: PlayerProps) {
         if (wallet?.address !== address) {
             if (myRoom == 0 || myRoom !== roomId) return
         }
-        const player = new Player(wallet?.address === address)
+        const player = new Player(wallet?.address === address, address)
         player.setPosition(0, 0)
         playerMager.addPlayer(address, player)
         container.addChild(player)
@@ -58,10 +58,11 @@ export function PlayerView(props: PlayerProps) {
                 const players = await contractMgr.getRoomPlayers(roomId);
                 console.log("players:", players);
                 for (const p of players) {
-                    const isSelf = p.address.toLowerCase() === wallet?.address;
+                    const address = p.address;
+                    const isSelf = address === wallet?.address;
                     if (isSelf) continue;
 
-                    const player = new Player(false);
+                    const player = new Player(false, address);
                     player.setPosition(p.x, p.y);
                     playerMager.addPlayer(p.address, player);
                     container.addChild(player);
@@ -71,14 +72,18 @@ export function PlayerView(props: PlayerProps) {
         console.log(`🚪 玩家进入房间：${name} (${address}) -> 房间 ${roomId.toString()}`);
     }
 
-    const hanldeMove = (address: any, roomId: any, posX: any, poxY: any): void => {
+    const hanldeMove = (address: any, roomId: any, posX: any, posY: any): void => {
         if (wallet?.address !== address) {
             if (myRoom == 0 || myRoom !== roomId) return
         } else {
             return
         }
-        console.log(`🚪 玩家移动：(${address}) -> 房间 ${roomId.toString()}`);
-        playerMager.findPlayer(address)?.setTarget(posX - contractMgr.offset, poxY - contractMgr.offset)
+        
+        const movePlayer = playerMager.findPlayer(address)
+        if(movePlayer) {
+            console.log(`🚪 玩家移动：(${address})`);
+            movePlayer.setTarget(Number(posX) - contractMgr.offset, Number(posY) - contractMgr.offset)
+        }
     }
 
     return null

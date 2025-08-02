@@ -18,6 +18,7 @@ export enum MoveType {
 
 export class Player extends Container {
     private isLocal: boolean
+    public address: string
     private character: Character = Character.HUMAN1
     public sprite: AnimatedSprite | undefined
 
@@ -28,11 +29,11 @@ export class Player extends Container {
     private keysPressed = new Set<string>()
     private keyPressed: string = ''
 
-    private targetX: number | null = null;
-    private targetY: number | null = null;
+    private targetPos: { x: number; y: number } | null = null;
     private speed: number = 100; // 每秒移动100像素（可调整）
-    constructor(isLocal = false) {
+    constructor(isLocal = false, address: string) {
         super()
+        this.address = address
         this.isLocal = isLocal
 
         this.setAnim(AnimShowType.IDLE_FRONT)
@@ -62,27 +63,27 @@ export class Player extends Container {
         }
     }
     setTarget(x: number, y: number) {
-        this.targetX = x;
-        this.targetY = y;
-    }
+        console.log(`[Player] 设置目标位置：${x}, ${y}`);
+        this.targetPos = { x, y };
+    }   
+
     update(dt: number) {
-        if (this.targetX === null || this.targetY === null) {
+        if (this.targetPos == null) {
             this.moveStatus = MoveType.IDLE;
             this.updateAnimation();
             return;
         }
 
-        const dx = this.targetX - this.x;
-        const dy = this.targetY - this.y;
+        const dx = this.targetPos.x - this.x;
+        const dy = this.targetPos.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const step = this.speed * dt;
 
         if (dist <= step) {
             // 到达目标点
-            this.x = this.targetX;
-            this.y = this.targetY;
-            this.targetX = null;
-            this.targetY = null;
+            this.x = this.targetPos.x;
+            this.y = this.targetPos.y;
+            this.targetPos = null;
             this.moveStatus = MoveType.IDLE;
         } else {
             // 沿方向移动
