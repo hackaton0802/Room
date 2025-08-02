@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function RoomList() {
     const navigate = useNavigate()
-    const [showList, setShowList] = useState(true);
+    const [showList] = useState(true);
     const [show, setShow] = useState(false);
     const [townIds, setTownIds] = useState<number[]>([]);
     const [names, setNames] = useState<string[]>([]);

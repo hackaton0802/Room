@@ -1,8 +1,6 @@
 import { Tile } from '../model/tile';
 import { View } from '../model/view';
 import { SPRITE_ID, spriteMager } from '../resource_mgr/sprite_mgr';
-import { playerMager } from './player_mgr';
-
 export function TileKey(gridX: number, gridY: number): number {
     const offset = 45000;  // 偏移量
     const positiveGridX = gridX + offset;  // 将负数转为正数

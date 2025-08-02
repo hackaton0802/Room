@@ -1,4 +1,4 @@
-import { use, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useTick } from '@pixi/react'
 import { Container } from 'pixi.js'
 import { useAuth } from '@context/auth'
@@ -43,6 +43,7 @@ export function PlayerView(props: PlayerProps) {
         if (wallet?.address !== address) {
             if (myRoom == 0 || myRoom !== roomId) return
         }
+        if(playerMager.findPlayer(address) !== null) return
         const player = new Player(wallet?.address === address, address)
         player.setPosition(0, 0)
         playerMager.addPlayer(address, player)

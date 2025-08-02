@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { MnemonicInput } from '@/components/display'
 import { useAuth } from '@/context/auth'
-import { contractMgr, TestPrivateKey } from '@/game/data_mgr/contract_mgr'
+import { contractMgr } from '@/game/data_mgr/contract_mgr'
 import { ethers } from 'ethers'
 
 export default function Login() {

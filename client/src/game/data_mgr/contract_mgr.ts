@@ -13,11 +13,9 @@ const roomAbi = [
 const roomContractAddress = import.meta.env.VITE_ROOMS_ADDRESS || '';
 
 const rpcUrl = import.meta.env.VITE_ETH_URL;
-export const TestPrivateKey = import.meta.env.VITE_PRIVATE_KEY;
 
 export class ContractManager {
     private roomContract: ethers.Contract;
-    private roomId: number = 0;
     public offset: number = 10000;
     constructor() {
         const provider = new ethers.JsonRpcProvider(rpcUrl);

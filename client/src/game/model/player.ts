@@ -1,7 +1,6 @@
-import { Container, AnimatedSprite, SCALE_MODES, Texture, Sprite, Graphics } from 'pixi.js'
+import { Container, AnimatedSprite, SCALE_MODES } from 'pixi.js'
 import { AnimShowType, animManager, Character } from '@/game/resource_mgr/anim_mgr'
 import { View } from './view'
-import { SPRITE_ID } from '../resource_mgr/sprite_mgr'
 
 export enum Direction {
     UP = 1,
