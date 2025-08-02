@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { playerMager } from "./player_mgr";
 
 const roomAbi = [
     'function getAllRooms() external view returns (uint256[] memory ids_, string[] memory names_)',
@@ -30,10 +31,10 @@ export class ContractManager {
         const provider = new ethers.JsonRpcProvider(rpcUrl);
         const wallet = new ethers.Wallet(privateKey, provider);
         this.roomContract = new ethers.Contract(roomContractAddress, roomAbi, wallet);
+    }
 
-        this.roomContract.on("PlayerEntered", (player, roomId, name) => {
-            console.log(`🚪 玩家进入房间：${name} (${player}) -> 房间 ${roomId.toString()}`);
-        });
+    addEvent(eventName: string, callback: (...args: any[]) => void){
+        this.roomContract.on(eventName, callback);
     }
 
     async createRoom(name: string) {
@@ -44,30 +45,7 @@ export class ContractManager {
             const receipt = await tx.wait();
             console.log("Transaction mined:", receipt.transactionHash);
 
-            const iface = new ethers.Interface(roomAbi);
-            let roomId: number | null = null;
-
-            for (const log of receipt.logs) {
-                // 只解析当前合约地址的事件
-                if (log.address.toLowerCase() === String(this.roomContract.target).toLowerCase()) {
-                    try {
-                        const parsed = iface.parseLog(log); // 如果不能解析会 throw
-                        if (parsed && parsed.name === "RoomCreated") {
-                            roomId = Number(parsed.args.roomId);
-                            console.log(`Room created! ID: ${roomId}, creator: ${parsed.args.creator}`);
-                            break;
-                        }
-                    } catch {
-                        // 不是 RoomCreated 事件，跳过
-                    }
-                }
-            }
-
-            if (roomId === null) {
-                console.warn("RoomCreated event not found in logs.");
-            }
-
-            return roomId;
+            return null;
         } catch (error) {
             console.error("Failed to create room:", error);
             return null;
@@ -113,8 +91,6 @@ export class ContractManager {
             return false;
         }
     }
-
-
 
     async getAllRooms() {
         return await this.roomContract.getAllRooms();

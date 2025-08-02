@@ -36,7 +36,7 @@ export function GameScene() {
     return (
         <>
             <MapView container={mapLayer} />
-            {/* <PlayerView container={playerLayer} camera={camera} /> */}
+            <PlayerView container={playerLayer} camera={camera}/>
         </>
     );
 }
