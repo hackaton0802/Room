@@ -13,7 +13,6 @@ const roomAbi = [
     'event PlayerMoved(address indexed player, uint256 indexed roomId, uint256 posX, uint256 posY)'
 ];
 const roomContractAddress = import.meta.env.VITE_ROOMS_ADDRESS || '';
-const roomContractWssAddress = import.meta.env.VITE_ETH_WS_URL || '';
 
 const rpcUrl = import.meta.env.VITE_ETH_URL;
 
@@ -28,7 +27,6 @@ export class ContractManager {
 
     async reload(privateKey: string) {
         const provider = new ethers.JsonRpcProvider(rpcUrl);
-        const wsProvider = new ethers.WebSocketProvider(roomContractWssAddress);
         const wallet = new ethers.Wallet(privateKey, provider);
         this.roomContract = new ethers.Contract(roomContractAddress, roomAbi, wallet);
         const latestBlock = await provider.getBlockNumber();
