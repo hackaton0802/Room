@@ -25,8 +25,8 @@ export function PlayerView(props: PlayerProps) {
     const { container, camera } = props;
     const { wallet } = useAuth();
     useEffect(() => {
-        contractMgr.addEvent("PlayerEntered", hanldeEnter);
-        contractMgr.addEvent("PlayerMoved", hanldeMove);
+        contractMgr.addEventPolling("PlayerEntered", hanldeEnter);
+        contractMgr.addEventPolling("PlayerMoved", hanldeMove);
     }, [])
 
 

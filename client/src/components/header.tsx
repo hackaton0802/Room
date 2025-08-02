@@ -21,7 +21,7 @@ export default function Header() {
       const wallet = ethers.Wallet.fromPhrase(user.mnemonic)
       login(user, user.mnemonic, wallet)
       
-      // console.log(wallet.privateKey)
+      console.log(wallet.privateKey)
       contractMgr.reload(wallet.privateKey)
       navigate('/room_list');
       return

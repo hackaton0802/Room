@@ -1,3 +1,5 @@
+import { Log } from "ethers";
+import { id, Interface } from "ethers";
 import { ethers } from "ethers";
 
 const roomAbi = [
@@ -11,26 +13,99 @@ const roomAbi = [
     'event PlayerMoved(address indexed player, uint256 indexed roomId, uint256 posX, uint256 posY)'
 ];
 const roomContractAddress = import.meta.env.VITE_ROOMS_ADDRESS || '';
+const roomContractWssAddress = import.meta.env.VITE_ETH_WS_URL || '';
 
 const rpcUrl = import.meta.env.VITE_ETH_URL;
 
 export class ContractManager {
     private roomContract: ethers.Contract;
     public offset: number = 10000;
+    private latestBlockChecked = 0;
     constructor() {
         const provider = new ethers.JsonRpcProvider(rpcUrl);
         this.roomContract = new ethers.Contract(roomContractAddress, roomAbi, provider);
     }
 
-    reload(privateKey: string) {
+    async reload(privateKey: string) {
         const provider = new ethers.JsonRpcProvider(rpcUrl);
+        const wsProvider = new ethers.WebSocketProvider(roomContractWssAddress);
         const wallet = new ethers.Wallet(privateKey, provider);
         this.roomContract = new ethers.Contract(roomContractAddress, roomAbi, wallet);
+        const latestBlock = await provider.getBlockNumber();
+        this.latestBlockChecked = latestBlock;
     }
 
     addEvent(eventName: string, callback: (...args: any[]) => void) {
         this.roomContract.on(eventName, callback);
     }
+
+    addEventPolling(
+        eventName: string,
+        callback: (...args: any[]) => void,
+        intervalMs = 5000,
+        fromBlock?: number
+    ) {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        const iface = new Interface(roomAbi);
+
+        if(fromBlock !== undefined) {
+            this.latestBlockChecked = fromBlock;
+        }
+        const BLOCK_LIMIT = 99;
+
+        const eventSignatureMap: Record<string, string> = {
+            PlayerEntered: "PlayerEntered(address,uint256,string)",
+            PlayerMoved: "PlayerMoved(address,uint256,uint256,uint256)",
+            RoomCreated: "RoomCreated(address,uint256)"
+        };
+
+        const eventSignature = eventSignatureMap[eventName];
+        if (!eventSignature) {
+            console.error(`❌ Unknown event: ${eventName}`);
+            return;
+        }
+
+        const eventTopic = id(eventSignature);
+
+        const poll = async () => {
+            try {
+                const latestBlock = await provider.getBlockNumber();
+
+                // 分批处理，避免超出 block range 限制
+                while (this.latestBlockChecked < latestBlock) {
+                    const from = this.latestBlockChecked + 1;
+                    const to = Math.min(from + BLOCK_LIMIT - 1, latestBlock);
+
+                    const logs: Log[] = await provider.getLogs({
+                        fromBlock: from,
+                        toBlock: to,
+                        address: roomContractAddress,
+                        topics: [eventTopic],
+                    });
+
+                    for (const log of logs) {
+                        try {
+                            const parsed = iface.parseLog(log);
+                            if (parsed) {
+                                callback(...parsed.args);
+                            }
+                        } catch (err) {
+                            console.warn("⚠️ 无法解析日志:", err);
+                        }
+                    }
+
+                    this.latestBlockChecked = to;
+                }
+            } catch (err) {
+                console.error(`Polling error for ${eventName}:`, err);
+            }
+
+            setTimeout(poll, intervalMs);
+        };
+
+        poll();
+    }
+
 
     async createRoom(name: string) {
         try {
