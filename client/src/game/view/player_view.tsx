@@ -15,6 +15,9 @@ export type PlayerData = {
     character: Character
 }
 
+type MapProps = {
+    container: Container;
+};
 export function PlayerView() {
     useEffect(() => {
 

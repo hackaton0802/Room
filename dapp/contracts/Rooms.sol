@@ -75,12 +75,7 @@ contract Rooms is ERC721URIStorage {
     }
 
     /// 获取当前房间内其他人的信息
-    function getRoomPlayers(uint256 _roomId) external view returns (
-        address[] memory addrs,
-        string[] memory names,
-        uint256[] memory xs,
-        uint256[] memory ys
-    ) {
+    function getRoomPlayers(uint256 _roomId) external view returns (address[] memory addrs,string[] memory names,uint256[] memory xs,uint256[] memory ys) {
         require(_roomId > 0 && _roomId <= roomCount, "Room does not exist");
 
         address[] memory players = roomPlayers[_roomId];

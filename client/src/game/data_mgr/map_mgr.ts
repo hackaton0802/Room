@@ -2,7 +2,6 @@ import { Tile } from '../model/tile';
 import { View } from '../model/view';
 import { SPRITE_ID, spriteMager } from '../resource_mgr/sprite_mgr';
 import { playerMager } from './player_mgr';
-import { uiManager, UIType } from './ui_mgr';
 
 export function TileKey(gridX: number, gridY: number): number {
     const offset = 45000;  // 偏移量
@@ -110,9 +109,6 @@ export class MapManager {
         }
         this.editMode = false;
         this.editModeTerrainData.clear();
-
-        uiManager.removeUI(UIType.EditMode)
-        playerMager.getSelf()?.removeCarriedItem()
     }
 
     getAddTiles() {

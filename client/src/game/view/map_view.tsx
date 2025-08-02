@@ -4,18 +4,13 @@ import { useTick } from '@pixi/react';
 import { playerMager } from '@/game/data_mgr/player_mgr';
 import { GetTileKey, mapMager } from "@/game/data_mgr/map_mgr";
 import { View } from '../model/view';
-import { useAuth } from '@/context/auth';
 type MapProps = {
     container: Container;
 };
 export function MapView(props: MapProps) {
     const { container } = props;
-    const { ws } = useAuth()
 
     useEffect(() => {
-        if (!ws) {
-            return
-        }
         const self = playerMager.getSelf()
         if (self) {
             handlePlayerMove(self.x, self.y)

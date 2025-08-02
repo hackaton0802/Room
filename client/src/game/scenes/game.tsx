@@ -4,7 +4,6 @@ import { MapView } from '../view/map_view';
 import { PlayerView } from '../view/player_view';
 import { Camera } from '@/game/model/camera';
 import { View } from '../model/view';
-import { uiManager } from '../data_mgr/ui_mgr';
 
 
 export function GameScene() {
@@ -20,10 +19,6 @@ export function GameScene() {
     cameraContainer.addChild(mapLayer, playerLayer);
     app.stage.addChild(cameraContainer);
 
-    const bagContainer = new Container();
-    app.stage.addChild(bagContainer);
-    const editModeContainer = new Container();
-    app.stage.addChild(editModeContainer);
     const camera = new Camera(
         cameraContainer,
         worldWidth,
@@ -32,17 +27,16 @@ export function GameScene() {
         worldHeight
     );
 
-    uiManager.init(app)
-
     // 添加帧循环
     app.ticker.add(() => {
         camera.update();
     });
 
+    console.log('Game init');
     return (
         <>
             <MapView container={mapLayer} />
-            <PlayerView container={playerLayer} camera={camera} />
+            {/* <PlayerView container={playerLayer} camera={camera} /> */}
         </>
     );
 }
