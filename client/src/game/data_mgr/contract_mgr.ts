@@ -42,7 +42,7 @@ export class ContractManager {
     addEventPolling(
         eventName: string,
         callback: (...args: any[]) => void,
-        intervalMs = 5000,
+        intervalMs = 1000,
         fromBlock?: number
     ) {
         const provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -51,7 +51,7 @@ export class ContractManager {
         if(fromBlock !== undefined) {
             this.latestBlockChecked = fromBlock;
         }
-        const BLOCK_LIMIT = 99;
+        const BLOCK_LIMIT = 20;
 
         const eventSignatureMap: Record<string, string> = {
             PlayerEntered: "PlayerEntered(address,uint256,string)",
